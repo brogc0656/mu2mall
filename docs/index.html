@@ -83,8 +83,10 @@
                 <p class="text-gray-600">다양한 브랜드의 모바일 상품권을 만나보세요</p>
             </div>
 
-            <div class="max-w-md mx-auto">
-                <div class="product-card bg-white rounded-2xl shadow-lg overflow-hidden">
+            <!-- Gift Card Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                <!-- 신세계상품권 -->
+                <div class="product-card bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all hover:scale-105">
                     <div class="relative h-64 bg-gradient-to-br from-gray-50 to-gray-100">
                         <img src="images/shinsegae.avif" alt="신세계상품권" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div style="display:none;" class="w-full h-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
@@ -103,14 +105,78 @@
                         <div class="bg-gray-50 rounded-xl p-4 mb-5">
                             <p class="text-sm font-medium text-gray-700 mb-3">금액 선택</p>
                             <div class="grid grid-cols-2 gap-2">
-                                <button onclick="selectAmount(10000, this)" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">10,000원</button>
-                                <button onclick="selectAmount(30000, this)" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">30,000원</button>
-                                <button onclick="selectAmount(50000, this)" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">50,000원</button>
-                                <button onclick="selectAmount(100000, this)" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">100,000원</button>
+                                <button onclick="selectAmount(10000, this, '신세계')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">10,000원</button>
+                                <button onclick="selectAmount(30000, this, '신세계')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">30,000원</button>
+                                <button onclick="selectAmount(50000, this, '신세계')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">50,000원</button>
+                                <button onclick="selectAmount(100000, this, '신세계')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">100,000원</button>
                             </div>
                         </div>
 
-                        <button onclick="buyGiftCard('신세계상품권')" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-all">
+                        <button onclick="buyGiftCard('신세계상품권')" class="buy-btn-신세계 w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-all">
+                            지금 구매하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 현대상품권 -->
+                <div class="product-card bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all hover:scale-105">
+                    <div class="relative h-64 bg-gradient-to-br from-purple-100 to-pink-100">
+                        <div class="w-full h-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                            <span class="text-white text-5xl font-bold">현대</span>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            즉시 발송
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-5">
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">현대상품권</h4>
+                            <p class="text-gray-600">현대백화점, 현대홈쇼핑에서 사용 가능</p>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-4 mb-5">
+                            <p class="text-sm font-medium text-gray-700 mb-3">금액 선택</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="selectAmount(10000, this, '현대')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 text-sm font-medium transition-all">10,000원</button>
+                                <button onclick="selectAmount(30000, this, '현대')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 text-sm font-medium transition-all">30,000원</button>
+                                <button onclick="selectAmount(50000, this, '현대')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 text-sm font-medium transition-all">50,000원</button>
+                                <button onclick="selectAmount(100000, this, '현대')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-purple-600 hover:text-purple-600 hover:bg-purple-50 text-sm font-medium transition-all">100,000원</button>
+                            </div>
+                        </div>
+
+                        <button onclick="buyGiftCard('현대상품권')" class="buy-btn-현대 w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-all">
+                            지금 구매하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 롯데상품권 -->
+                <div class="product-card bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all hover:scale-105">
+                    <div class="relative h-64 bg-gradient-to-br from-red-100 to-orange-100">
+                        <div class="w-full h-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+                            <span class="text-white text-5xl font-bold">LOTTE</span>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            즉시 발송
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="mb-5">
+                            <h4 class="text-2xl font-bold text-gray-900 mb-2">롯데상품권</h4>
+                            <p class="text-gray-600">롯데백화점, 롯데마트에서 사용 가능</p>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl p-4 mb-5">
+                            <p class="text-sm font-medium text-gray-700 mb-3">금액 선택</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="selectAmount(10000, this, '롯데')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-red-600 hover:text-red-600 hover:bg-red-50 text-sm font-medium transition-all">10,000원</button>
+                                <button onclick="selectAmount(30000, this, '롯데')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-red-600 hover:text-red-600 hover:bg-red-50 text-sm font-medium transition-all">30,000원</button>
+                                <button onclick="selectAmount(50000, this, '롯데')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-red-600 hover:text-red-600 hover:bg-red-50 text-sm font-medium transition-all">50,000원</button>
+                                <button onclick="selectAmount(100000, this, '롯데')" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-red-600 hover:text-red-600 hover:bg-red-50 text-sm font-medium transition-all">100,000원</button>
+                            </div>
+                        </div>
+
+                        <button onclick="buyGiftCard('롯데상품권')" class="buy-btn-롯데 w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-all">
                             지금 구매하기
                         </button>
                     </div>
