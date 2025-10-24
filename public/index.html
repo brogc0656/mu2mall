@@ -103,14 +103,14 @@
                         <div class="bg-gray-50 rounded-xl p-4 mb-5">
                             <p class="text-sm font-medium text-gray-700 mb-3">금액 선택</p>
                             <div class="grid grid-cols-2 gap-2">
-                                <button class="px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">10,000원</button>
-                                <button class="px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">30,000원</button>
-                                <button class="px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">50,000원</button>
-                                <button class="px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">100,000원</button>
+                                <button onclick="selectAmount(10000, this)" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">10,000원</button>
+                                <button onclick="selectAmount(30000, this)" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">30,000원</button>
+                                <button onclick="selectAmount(50000, this)" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">50,000원</button>
+                                <button onclick="selectAmount(100000, this)" class="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all">100,000원</button>
                             </div>
                         </div>
 
-                        <button onclick="buyGiftCard('신세계상품권', 10000)" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-all">
+                        <button onclick="buyGiftCard('신세계상품권')" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-4 rounded-xl font-bold text-lg shadow-md hover:shadow-lg transition-all">
                             지금 구매하기
                         </button>
                     </div>
@@ -258,8 +258,30 @@
     </footer>
 
     <script>
-        function buyGiftCard(brand, amount) {
-            alert(`${brand} ${amount.toLocaleString()}원 구매 기능은 준비 중입니다.\n\nPG 결제 연동 후 사용 가능합니다.`);
+        // 선택된 금액을 저장하는 전역 변수
+        let selectedAmount = 10000; // 기본값: 10,000원
+
+        function selectAmount(amount, buttonElement) {
+            // 선택된 금액 저장
+            selectedAmount = amount;
+
+            // 모든 금액 버튼의 선택 상태 제거
+            document.querySelectorAll('.amount-btn').forEach(btn => {
+                btn.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
+                btn.classList.add('border-gray-200');
+            });
+
+            // 클릭한 버튼을 선택 상태로 표시
+            buttonElement.classList.remove('border-gray-200');
+            buttonElement.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+        }
+
+        function buyGiftCard(brand) {
+            if (!selectedAmount) {
+                alert('금액을 선택해주세요.');
+                return;
+            }
+            alert(`${brand} ${selectedAmount.toLocaleString()}원 구매 기능은 준비 중입니다.\n\nPG 결제 연동 후 사용 가능합니다.`);
         }
 
         function scrollToProducts() {
