@@ -120,9 +120,9 @@ export async function addGiftCard(request: GiftcardRequest): Promise<GiftcardRes
       CMD: "ADD",                                                      // 필수
       GIFTNM: CHLIFES_CONFIG.GIFTNM,                                   // 대문자
       FACE_PRICE: encryptChlifes(request.amount.toString()),           // 암호화 필수
-      ISSUE_REQ_SN: issueReqSn,                                       // 필수
+      ISSUE_REQ_SN: issueReqSn,                                       // 필수 (20자 이하)
       RECV_HPNO: encryptChlifes(request.phone.replace(/\D/g, '')),    // 암호화 필수 (숫자만)
-      MESSAGE: request.message || "상품권입니다",                      // 평문
+      MESSAGE: encryptChlifes(request.message || "상품권입니다"),      // 규격서 2.2: 암호화 대상
       VALID_DAY: request.validDay || "30"                              // 선택
     };
 

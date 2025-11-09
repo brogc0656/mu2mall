@@ -83,15 +83,20 @@ export function maskGiftcardCode(code: string): string {
 
 /**
  * ISSUE_REQ_SN 생성 (클라이프스 규격서 준수)
+ * 규격서: C, 20자, 필수
  * 형식: BRO{YYYYMMDDHHmmss}{random}
- * 예시: BRO2025011012345678
- * 규칙: 20자 이하, 유니크 보장
+ * 예시: BRO20250110123456 (20자)
+ * 규칙: 정확히 20자 이하, 유니크 보장
  */
 export function generateIssueReqSn(): string {
   const now = new Date();
+  // YYYYMMDDHHmmss = 14자
   const timestamp = now.toISOString()
     .replace(/[-:T.]/g, '')
-    .slice(0, 14); // YYYYMMDDHHmmss
-  const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-  return `BRO${timestamp}${random}`;
+    .slice(0, 14);
+  // BRO(3) + timestamp(14) + random(3) = 20자
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  const sn = `BRO${timestamp}${random}`;
+  // 20자 초과 방지 (안전장치)
+  return sn.length > 20 ? sn.substring(0, 20) : sn;
 }
