@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     // 2. 요청 데이터 파싱
     const body = await request.json();
-    const { goodsname, amt, buyername, bypassValue } = body;
+    const { goodsname, amt, buyername, bypassValue, resulturl, notiurl } = body;
 
     // 3. 입력 검증
     if (!goodsname || !amt || !buyername || !bypassValue) {
@@ -60,7 +60,13 @@ export async function POST(request: NextRequest) {
     // 4. 주문 ID 생성
     const orderId = generateOrderId();
 
-    // 4. Wizzpay 결제 데이터 생성
+    // 4. Base URL 생성 (NOTIURL, RESULTURL용)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+      (request.headers.get('origin') || request.headers.get('host') ? 
+        `${request.headers.get('x-forwarded-proto') || 'https'}://${request.headers.get('host')}` : 
+        'http://localhost:3000');
+
+    // 5. Wizzpay 결제 데이터 생성
     const paymentData = createPaymentData({
       orderid: orderId,
       goodsname: goodsname,
@@ -69,20 +75,23 @@ export async function POST(request: NextRequest) {
       buyertel: '', // 클라이언트에서 입력받은 값은 BYPASSVALUE로 전달
       buyeremail: '',
       bypassvalue: bypassValue,
+      resulturl: resulturl || `${baseUrl}/payment/return`,
+      notiurl: notiurl || `${baseUrl}/api/payment/notification`,
     });
 
-    // 5. 데이터 암호화
+    // 6. 데이터 암호화
     const dataString = JSON.stringify(paymentData);
     const encryptedData = encryptWizzpay(dataString);
 
     logger.info('결제 초기화 성공', { orderId, amount: amt });
 
-    // 6. 암호화된 데이터와 MID만 클라이언트로 전송
+    // 7. 암호화된 데이터와 MID만 클라이언트로 전송
+    // ⚠️ 중요: 환경 변수에서 개행 문자 제거 (trim)
     return NextResponse.json({
       success: true,
       transactionId: orderId,
-      wizzUrl: WIZZ_CONFIG.WIZZ_URL,
-      mid: WIZZ_CONFIG.MID,
+      wizzUrl: WIZZ_CONFIG.WIZZ_URL.trim(),
+      mid: WIZZ_CONFIG.MID.trim(),
       data: encryptedData,
     });
   } catch (error: any) {

@@ -113,92 +113,105 @@ export default function HomePage() {
     }
 
     try {
-      // Wizzpay 환경변수 확인
-      const wizzUrl = process.env.NEXT_PUBLIC_WIZZPAY_URL;
-      const wizzMid = process.env.NEXT_PUBLIC_WIZZPAY_MID;
-      const wizzIvKey = process.env.NEXT_PUBLIC_WIZZPAY_IV_KEY;
-      const wizzSalt = process.env.NEXT_PUBLIC_WIZZPAY_SALT;
-      const wizzPassword = process.env.NEXT_PUBLIC_WIZZPAY_PASSWORD;
-
-      console.log('🔧 Wizzpay 설정:', {
-        wizzUrl,
-        wizzMid,
-        wizzIvKey: wizzIvKey ? `${wizzIvKey.substring(0, 4)}...` : 'undefined',
-        wizzSalt: wizzSalt ? `${wizzSalt.substring(0, 4)}...` : 'undefined',
-        wizzPassword: wizzPassword ? `${wizzPassword.substring(0, 4)}...` : 'undefined',
+      // ✅ 보안: 서버에서 결제 초기화 API 호출 (키 노출 방지)
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const bypassValue = JSON.stringify({
+        orderId: orderId,
+        phone: phoneNumber,
+        goodsCode: GOODS_CODE,
+        buyerName: buyerName,
       });
 
-      if (!wizzUrl || !wizzMid || !wizzIvKey || !wizzSalt || !wizzPassword) {
-        throw new Error('Wizzpay 설정이 올바르지 않습니다.');
+      const initResponse = await fetch(`${baseUrl}/api/payment/init`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          goodsname: productName,
+          amt: amount.toString(),
+          buyername: buyerName,
+          bypassValue: bypassValue,
+        }),
+      });
+
+      if (!initResponse.ok) {
+        const errorData = await initResponse.json();
+        throw new Error(errorData.error || '결제 초기화에 실패했습니다.');
       }
 
-      // Wizzpay 인스턴스 초기화 (실제 암호화 키 사용)
-      if (typeof window !== 'undefined' && window.WizzpayISP) {
-        window.wizzpayInstance = new window.WizzpayISP(
-          wizzUrl,
-          wizzMid,
-          wizzIvKey,
-          wizzSalt,
-          wizzPassword
-        );
-        window.wizzpayInstance.setDebugMode(true); // 디버그 모드 활성화
-        window.wizzpayInstance.setResultFunction(handlePaymentResult);
+      const initData = await initResponse.json();
 
-        console.log('✅ WizzpayISP 인스턴스 생성 완료');
+      if (!initData.success) {
+        throw new Error(initData.error || '결제 초기화에 실패했습니다.');
+      }
 
-        // 결제 form 생성 (goPay 메서드가 사용)
-        const paymentForm = document.createElement('form');
-        paymentForm.name = 'wizzpayForm';
-        paymentForm.style.display = 'none';
+      // ✅ 서버에서 받은 암호화된 데이터로 Wizzpay 결제 진행 (키 노출 없음)
+      // ⚠️ 중요: 개행 문자 제거 (안전장치)
+      const wizzUrl = (initData.wizzUrl || '').trim();
+      const mid = (initData.mid || '').trim();
+      const encryptedData = initData.data;
 
-        const goodsnameInput = document.createElement('input');
-        goodsnameInput.type = 'hidden';
-        goodsnameInput.name = 'GOODSNAME';
-        goodsnameInput.value = productName;
-        paymentForm.appendChild(goodsnameInput);
+      // Wizzpay 결제 팝업 생성
+      const popupName = 'wizzpayPopup';
+      const popup = window.open(
+        'about:blank',
+        popupName,
+        'left=50, top=50, width=710px, height=510px, toolbar=no, scrollbars=no, status=no, resizable=no'
+      );
 
-        const amtInput = document.createElement('input');
-        amtInput.type = 'hidden';
-        amtInput.name = 'AMT';
-        amtInput.value = amount.toString();
-        paymentForm.appendChild(amtInput);
+      if (!popup) {
+        throw new Error('팝업이 차단되었습니다. 팝업 차단을 해제해주세요.');
+      }
 
-        const buyernameInput = document.createElement('input');
-        buyernameInput.type = 'hidden';
-        buyernameInput.name = 'BUYERNAME';
-        buyernameInput.value = buyerName;
-        paymentForm.appendChild(buyernameInput);
+      // Wizzpay 서버로 전송할 form 생성
+      const requestForm = document.createElement('form');
+      requestForm.action = `${wizzUrl}/pay/api/auth/common/Ready.jsp`;
+      requestForm.method = 'POST';
+      requestForm.target = popupName;
+      requestForm.style.display = 'none';
 
-        const bypassvalueInput = document.createElement('input');
-        bypassvalueInput.type = 'hidden';
-        bypassvalueInput.name = 'BYPASSVALUE';
-        bypassvalueInput.value = `orderId=${orderId};phone=${phoneNumber};goodsCode=${GOODS_CODE}`;
-        paymentForm.appendChild(bypassvalueInput);
+      // MID와 암호화된 DATA 전송 (규격서 준수)
+      const midInput = document.createElement('input');
+      midInput.type = 'hidden';
+      midInput.name = 'MID';
+      midInput.value = mid;
+      requestForm.appendChild(midInput);
 
-        document.body.appendChild(paymentForm);
+      const dataInput = document.createElement('input');
+      dataInput.type = 'hidden';
+      dataInput.name = 'DATA';
+      dataInput.value = encryptedData;
+      requestForm.appendChild(dataInput);
 
-        // Form 데이터 로그
-        console.log('📋 Form 데이터:', {
-          GOODSNAME: productName,
-          AMT: amount,
-          BUYERNAME: buyerName,
-          BYPASSVALUE: `orderId=${orderId};phone=${phoneNumber};goodsCode=${GOODS_CODE}`,
-        });
+      const blockInput = document.createElement('input');
+      blockInput.type = 'hidden';
+      blockInput.name = 'BLOCK_CARD_COMPANIES';
+      blockInput.value = '';
+      requestForm.appendChild(blockInput);
 
-        // goPay() 메서드로 결제 시작
-        console.log('🚀 goPay() 호출 시작...');
-        const result = window.wizzpayInstance.goPay('wizzpayForm');
+      document.body.appendChild(requestForm);
+      requestForm.submit();
 
-        if (result) {
-          console.log('✅ goPay() 성공 - 팝업이 열렸습니다');
-        } else {
-          console.error('❌ goPay() 실패');
-          document.body.removeChild(paymentForm);
-          throw new Error('결제 시작에 실패했습니다.');
+      // 팝업이 닫힐 때 결과 처리
+      const checkPopup = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopup);
+          if (document.body.contains(requestForm)) {
+            document.body.removeChild(requestForm);
+          }
+          // 결제 결과는 /api/payment/notification에서 처리됨
+          setProcessingOverlayOpen(false);
+          setResultData({
+            icon: 'success',
+            title: '결제 진행 중',
+            message: '결제가 완료되면 SMS로 상품권이 발송됩니다.',
+          });
+          setResultModalOpen(true);
         }
-      } else {
-        throw new Error('WizzpayISP가 로드되지 않았습니다.');
-      }
+      }, 1000);
+
+      console.log('✅ Wizzpay 결제 팝업 열림 (서버 암호화 데이터 사용)');
     } catch (error: any) {
       console.error('❌ Payment launch failed:', error);
       setProcessingOverlayOpen(false);
