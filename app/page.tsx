@@ -177,17 +177,17 @@ export default function HomePage() {
 
       const resulturlInput = document.createElement('input');
       resulturlInput.name = 'RESULTURL';
-      resulturlInput.value = '';
+      resulturlInput.value = './payment-success';
       wizzForm.appendChild(resulturlInput);
 
       const notiurlInput = document.createElement('input');
       notiurlInput.name = 'NOTIURL';
-      notiurlInput.value = `${window.location.origin}/api/payment/notification`;
+      notiurlInput.value = '';
       wizzForm.appendChild(notiurlInput);
 
       const bypassInput = document.createElement('input');
       bypassInput.name = 'BYPASSVALUE';
-      bypassInput.value = bypassValue;
+      bypassInput.value = '';
       wizzForm.appendChild(bypassInput);
 
       document.body.appendChild(wizzForm);

@@ -44,28 +44,37 @@ function WizzpayISP(wizz_url, mid, iv_key, salt, password) {
 
 WizzpayISP.prototype.goPay = function(merchantFormName) {
 	let _self = this;
+	console.log('[DEBUG] goPay 시작 - merchantFormName:', merchantFormName);
 	if(merchantFormName == null || merchantFormName == "") {
 		this.errorLog("form name is empty or null.");
 		return false;
 	}
 	else if(document.getElementsByName(merchantFormName).length != 1) {
+		console.log('[DEBUG] Form 개수:', document.getElementsByName(merchantFormName).length);
 		this.errorLog("this form is not unique.");
 		return false;
 	}
+	console.log('[DEBUG] Form 찾음');
 	
 	
 	let merchantForm = document.getElementsByName(merchantFormName)[0];
+	console.log('[DEBUG] merchantForm:', merchantForm);
+	console.log('[DEBUG] GOODSNAME:', merchantForm.GOODSNAME?.value);
+	console.log('[DEBUG] AMT:', merchantForm.AMT?.value);
+	console.log('[DEBUG] BUYERNAME:', merchantForm.BUYERNAME?.value);
 
 	if(merchantForm.GOODSNAME == undefined		|| merchantForm.GOODSNAME.value == ""
 		|| merchantForm.AMT == undefined		|| merchantForm.AMT.value == ""
 		|| merchantForm.BUYERNAME == undefined	|| merchantForm.BUYERNAME.value == "")
 	{
+		console.log('[DEBUG] 필수값 체크 실패');
 		if((merchantForm.RESULTURL == undefined || merchantForm.RESULTURL.value == "")
 			&& typeof(this.RESULT_FUNCTION) == 'function' ) {
 			this.errorLog("required value is not enough.");
 			return false;
 		}
 	}
+	console.log('[DEBUG] Validation 통과');
 
 	let data = new Object();
 	data.goodsname   = merchantForm.GOODSNAME.value.substring(0,20);
@@ -74,21 +83,31 @@ WizzpayISP.prototype.goPay = function(merchantFormName) {
 	(merchantForm.RESULTURL != undefined) ? data.resulturl = merchantForm.RESULTURL.value : data.resulturl = "";
 	(merchantForm.NOTIURL != undefined)	? data.notiurl = merchantForm.NOTIURL.value : data.notiurl = "";
 	(merchantForm.BYPASSVALUE != undefined) ? data.bypassvalue = merchantForm.BYPASSVALUE.value : data.bypassvalue = "";
-	
+	console.log('[DEBUG] data 객체:', data);
+
 	let popupName = "payTest";
 	window.open("about:blank", popupName, "left=50, top=50, width=710px, height=510px, toolbar=no, scrollbars=no, status=no, resizable=no");
-	
+	console.log('[DEBUG] 팝업 열림');
+
 	let requestForm = document.createElement("form");
 	requestForm.appendChild(this.createHiddenInputDOM("MID", this.MID));
-	requestForm.appendChild(this.createHiddenInputDOM("DATA", this.toEncrypt(JSON.stringify(data))));
+	console.log('[DEBUG] MID 추가됨');
+	const encryptedData = this.toEncrypt(JSON.stringify(data));
+	console.log('[DEBUG] 암호화 완료, 길이:', encryptedData.toString().length);
+	requestForm.appendChild(this.createHiddenInputDOM("DATA", encryptedData));
+	console.log('[DEBUG] DATA 추가됨');
 	requestForm.appendChild(this.createHiddenInputDOM("BLOCK_CARD_COMPANIES", this.BLOCK_CARD_COMPANIES));
-	
+	console.log('[DEBUG] BLOCK_CARD_COMPANIES 추가됨');
+
 	requestForm.action = this.WIZZ_URL + this.REQUEST_URL;
 	requestForm.target = popupName;
 	requestForm.method = "post";
-	
+	console.log('[DEBUG] Form action:', requestForm.action);
+
 	document.body.appendChild(requestForm);
+	console.log('[DEBUG] Form DOM에 추가됨, submit 직전');
 	requestForm.submit();
+	console.log('[DEBUG] Form submit 완료');
 	
 	if(this.IS_ADD_EVNET === false) {
 		this.IS_ADD_EVNET = true;
