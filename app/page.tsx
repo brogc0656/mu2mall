@@ -177,7 +177,7 @@ export default function HomePage() {
 
       const resulturlInput = document.createElement('input');
       resulturlInput.name = 'RESULTURL';
-      resulturlInput.value = '';
+      resulturlInput.value = `${window.location.origin}/payment/success`;
       wizzForm.appendChild(resulturlInput);
 
       const notiurlInput = document.createElement('input');
