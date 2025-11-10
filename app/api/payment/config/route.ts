@@ -7,11 +7,11 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const config = {
-      wizzUrl: process.env.NEXT_PUBLIC_WIZZPAY_URL,
-      mid: process.env.WIZZPAY_MID,
-      iv: process.env.WIZZPAY_IV_KEY,
-      salt: process.env.WIZZPAY_SALT,
-      password: process.env.WIZZPAY_PASSWORD,
+      wizzUrl: process.env.NEXT_PUBLIC_WIZZPAY_URL?.trim(),
+      mid: process.env.WIZZPAY_MID?.trim(),
+      iv: process.env.WIZZPAY_IV_KEY?.trim(),
+      salt: process.env.WIZZPAY_SALT?.trim(),
+      password: process.env.WIZZPAY_PASSWORD?.trim(),
     };
 
     // 모든 필수 값이 있는지 확인
