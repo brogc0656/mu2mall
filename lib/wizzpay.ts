@@ -12,10 +12,21 @@ const WIZZ_CONFIG = {
 
 /**
  * Wizzpay 암호화 함수
+ * ⚠️ 중요: 위즈페이 SDK와 동일한 방식 사용 (PBKDF2 키 유도)
  */
 export function encryptWizzpay(data: string): string {
-  const key = CryptoJS.enc.Utf8.parse(WIZZ_CONFIG.PASSWORD);
-  const iv = CryptoJS.enc.Utf8.parse(WIZZ_CONFIG.IV_KEY);
+  // PBKDF2로 키 유도 (위즈페이 SDK function.js와 동일)
+  const key = CryptoJS.PBKDF2(
+    WIZZ_CONFIG.PASSWORD,
+    CryptoJS.enc.Hex.parse(WIZZ_CONFIG.SALT),
+    {
+      keySize: 128 / 32,  // 128 bits = 4 words
+      iterations: 1000
+    }
+  );
+
+  // IV는 Hex로 파싱 (위즈페이 SDK와 동일)
+  const iv = CryptoJS.enc.Hex.parse(WIZZ_CONFIG.IV_KEY);
 
   const encrypted = CryptoJS.AES.encrypt(data, key, {
     iv: iv,
@@ -28,10 +39,21 @@ export function encryptWizzpay(data: string): string {
 
 /**
  * Wizzpay 복호화 함수
+ * ⚠️ 중요: 위즈페이 SDK와 동일한 방식 사용 (PBKDF2 키 유도)
  */
 export function decryptWizzpay(encryptedData: string): string {
-  const key = CryptoJS.enc.Utf8.parse(WIZZ_CONFIG.PASSWORD);
-  const iv = CryptoJS.enc.Utf8.parse(WIZZ_CONFIG.IV_KEY);
+  // PBKDF2로 키 유도 (암호화와 동일)
+  const key = CryptoJS.PBKDF2(
+    WIZZ_CONFIG.PASSWORD,
+    CryptoJS.enc.Hex.parse(WIZZ_CONFIG.SALT),
+    {
+      keySize: 128 / 32,
+      iterations: 1000
+    }
+  );
+
+  // IV는 Hex로 파싱
+  const iv = CryptoJS.enc.Hex.parse(WIZZ_CONFIG.IV_KEY);
 
   const decrypted = CryptoJS.AES.decrypt(encryptedData, key, {
     iv: iv,
@@ -53,18 +75,20 @@ export interface PaymentRequest {
   buyertel: string;
   buyeremail: string;
   bypassvalue?: string;
+  resulturl?: string;
+  notiurl?: string;
 }
 
 export function createPaymentData(data: PaymentRequest) {
+  // ⚠️ 중요: 위즈페이 SDK와 동일한 소문자 키 사용
+  // MID는 암호화된 DATA에 포함하지 않음 (별도로 전송)
   return {
-    MID: WIZZ_CONFIG.MID,
-    ORDERID: data.orderid,
-    GOODSNAME: data.goodsname,
-    AMT: data.amt,
-    BUYERNAME: data.buyername,
-    BUYERTEL: data.buyertel,
-    BUYEREMAIL: data.buyeremail,
-    BYPASSVALUE: data.bypassvalue || '',
+    goodsname: data.goodsname,
+    amt: data.amt,
+    buyername: data.buyername,
+    resulturl: data.resulturl || '',
+    notiurl: data.notiurl || '',
+    bypassvalue: data.bypassvalue || '',
   };
 }
 
