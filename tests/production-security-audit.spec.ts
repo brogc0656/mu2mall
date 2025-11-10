@@ -275,11 +275,50 @@ test.describe('프로덕션 보안 검수', () => {
   test('10. 종합 보안 점수', async ({ page }) => {
     await page.goto(PRODUCTION_URL);
 
+    // 실제로 체크: JavaScript 번들에서 키 노출 여부
+    let apiKeyExposed = false;
+    page.on('response', async (response) => {
+      const url = response.url();
+      if (url.includes('.js') && !url.includes('wizzauth')) {
+        try {
+          const body = await response.text();
+          const secrets = ['WIZZPAY_PASSWORD', 'WIZZPAY_IV_KEY', 'WIZZPAY_SALT', 'CHLIFES_GENID', 'CHLIFES_ENC_KEY'];
+          for (const secret of secrets) {
+            if (body.includes(secret)) {
+              apiKeyExposed = true;
+              break;
+            }
+          }
+        } catch (e) {
+          // 일부 리소스는 text()로 읽을 수 없음
+        }
+      }
+    });
+
+    await page.waitForLoadState('networkidle');
+
+    // 실제로 체크: 페이지 소스에서 민감한 정보
+    const content = await page.content();
+    const sensitivePatterns = [
+      /WIZZPAY_PASSWORD/gi,
+      /WIZZPAY_IV_KEY/gi,
+      /WIZZPAY_SALT/gi,
+      /CHLIFES_GENID/gi,
+      /CHLIFES_ENC_KEY/gi,
+    ];
+    let sensitiveExposed = false;
+    for (const pattern of sensitivePatterns) {
+      if (content.match(pattern)) {
+        sensitiveExposed = true;
+        break;
+      }
+    }
+
     const securityChecks = {
       'HTTPS 사용': PRODUCTION_URL.startsWith('https://'),
-      '민감한 환경 변수 노출': false, // 앞의 테스트에서 확인
+      '민감한 환경 변수 노출': !sensitiveExposed, // 실제 체크
       'WizzAuth 스크립트 로드': await page.locator('script[src*="wizzauth"]').count() >= 3,
-      'API 키 클라이언트 노출': false, // 앞의 테스트에서 확인
+      'API 키 클라이언트 노출': !apiKeyExposed, // 실제 체크
       '입력 검증 (전화번호)': true, // API에 구현됨
       '입력 검증 (금액)': true, // API에 구현됨
     };

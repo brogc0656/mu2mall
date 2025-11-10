@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>위즈페이 공식 샘플 테스트</title>
+</head>
+<body>
+<h2>위즈페이 공식 샘플 테스트</h2>
+
+<form name="merForm">
+  <div>
+    <label>상품명:</label>
+    <input id="GOODSNAME" name="GOODSNAME" value="테스트상품권">
+  </div>
+  <div>
+    <label>금액:</label>
+    <input id="AMT" name="AMT" value="1010">
+  </div>
+  <div>
+    <label>구매자명:</label>
+    <input id="BUYERNAME" name="BUYERNAME" value="테스트">
+  </div>
+  <div>
+    <label>RESULTURL:</label>
+    <input id="RESULTURL" name="RESULTURL" value="">
+  </div>
+  <div>
+    <label>NOTIURL:</label>
+    <input id="NOTIURL" name="NOTIURL" value="">
+  </div>
+  <div>
+    <label>BYPASSVALUE:</label>
+    <input id="BYPASSVALUE" name="BYPASSVALUE" value="field1=abc;field2=def;">
+  </div>
+  <br>
+  <button type="button" onclick="goPay();">결제 테스트</button>
+</form>
+
+<script src="/wizzauth/aes.js"></script>
+<script src="/wizzauth/pbkdf2.js"></script>
+<script src="/wizzauth/function.js"></script>
+
+<script>
+  // 개발 환경 설정
+  var WIZZ_URL = "https://pgadmin.wizzpay.co.kr";
+  var MID = "isptest03m";
+  var IV_KEY = "7e74bfa70c4a79d827b500ab9a287d63";
+  var SALT = "f8eb4a8a6873ba15e86668f1a17c0642";
+  var PASSWORD = "1733";
+
+  var wizzpay = new WizzpayISP(WIZZ_URL, MID, IV_KEY, SALT, PASSWORD);
+  wizzpay.setDebugMode(true);
+
+  var resultFunction = function () {
+    var returnData = wizzpay.getResultData();
+    console.log("결제 결과:", returnData);
+    alert("결제가 완료되었습니다.");
+  };
+
+  wizzpay.setResultFunction(resultFunction);
+
+  function goPay() {
+    console.log("=== 결제 시작 ===");
+    console.log("WIZZ_URL:", WIZZ_URL);
+    console.log("MID:", MID);
+    console.log("IV_KEY:", IV_KEY);
+    console.log("SALT:", SALT);
+    console.log("PASSWORD:", PASSWORD);
+    wizzpay.goPay("merForm");
+  }
+</script>
+</body>
+</html>

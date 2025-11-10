@@ -11,8 +11,13 @@ import CryptoJS from 'crypto-js';
 import { generateIssueReqSn } from './utils';
 
 // 환경 변수에서만 읽음 (브라우저 노출 방지)
+// ⚠️ 프로덕션 IP 화이트리스트 이슈:
+// - Vercel은 동적 IP를 사용하므로 고정 IP 제공 불가
+// - 프로덕션 API는 IP 화이트리스트 필수
+// - 해결: 로컬 프록시 서버 사용 (CHLIFES_PROXY_URL 설정 시)
 const CHLIFES_CONFIG = {
-  API_URL: process.env.NEXT_PUBLIC_CHLIFES_URL!,
+  // 프로덕션에서 프록시 서버 사용 (로컬 컴퓨터의 고정 IP)
+  API_URL: process.env.CHLIFES_PROXY_URL || process.env.NEXT_PUBLIC_CHLIFES_URL!,
   GENID: process.env.CHLIFES_GENID!,
   GIFTNM: process.env.CHLIFES_GIFTNM!,
   ENC_KEY: process.env.CHLIFES_ENC_KEY!,
@@ -127,7 +132,13 @@ export async function addGiftCard(request: GiftcardRequest): Promise<GiftcardRes
     };
 
     // API 호출
-    const response = await fetch(`${CHLIFES_CONFIG.API_URL}/bro/gift_add.php`, {
+    // 프록시 서버 사용 시: /proxy/chlifes/bro/gift_add.php
+    // 직접 호출 시: /bro/gift_add.php
+    const apiPath = CHLIFES_CONFIG.API_URL.includes('/proxy/chlifes') 
+      ? `${CHLIFES_CONFIG.API_URL}/bro/gift_add.php`
+      : `${CHLIFES_CONFIG.API_URL}/bro/gift_add.php`;
+    
+    const response = await fetch(apiPath, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json; charset=utf-8'

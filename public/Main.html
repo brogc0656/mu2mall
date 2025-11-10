@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<link href='./css/wizz.css' rel="stylesheet" type="text/css">
+<title>:::�������� ���� ����:::</title>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h2><span class="blind">WIZZPAY</span></h2>
+  </div>
+  <div class="container">
+  		<div class="menu">
+  			<div class="top_line"></div>
+  			<div class="light"></div>
+  			<table class="menu_elm" cellpadding="0" cellspacing="0" border="0">
+  				<tbody><tr>
+  					<td colspan="2" class="ttl" style="padding-top:5px;">���� ���� ���� ������</td>
+  				</tr>
+  			</tbody></table>
+  		</div>
+    <div class="contents">
+      <div class="title">
+        <div>��ǰ��</div>
+        <div>��ǰ�ݾ�</div>
+        <div>���ż��� URL</div>
+        <div>���� ��� ���� URL</div>
+        <div>���� ��� ���� �Ķ����</div>
+        <div>�����ڸ�</div>
+      </div>
+      <div class="body">
+        <form class="merForm" name="merForm">
+          <input id="GOODSNAME" placeholder="��ǰ��" name="GOODSNAME" size="20" class="input" value="�׽�Ʈ �����Դϴ�!!!">
+          <input id="AMT" placeholder="��ǰ�ݾ�" size="20" class="input" value="1010">
+          <input id="RESULTURL" placeholder="resultURL" size="50" class="input" value="./Success.html">
+          <input id="NOTIURL" placeholder="notiURL" size="50" class="input" value="">
+          <input id="BYPASSVALUE" placeholder="bypassvalue" size="50" class="input" value="field1=abc;field2=def;">
+          <input id="BUYERNAME" placeholder="�����ڸ�" class="input" size="20" value="�׽�Ʈ">
+        </form>
+      </div>
+    </div>
+    <font color="#ff0000">* ��ũ��Ʈ ȣ���� ���� ��� URL���� ����ּ���.</font><br/><br/>
+    <button class="btnPay or w12" onclick="goPay();">����</button>
+		<div class="info">�������� : 1544-3267 | ����������ȸ www.wizzpay.co.kr<br>(��)������ ��������</div>
+  </div>
+</div>
+</body>
+<script src="/wizzauth/aes.js" charset="utf-8"></script>
+<script src="/wizzauth/pbkdf2.js" charset="utf-8"></script>
+<script src="/wizzauth/function.js" charset="utf-8"></script>
+<script>
+	var WIZZ_URL = "https://pgadmin.wizzpay.co.kr";
+	var MID = "isptest03m";
+	var IV_KEY = "7e74bfa70c4a79d827b500ab9a287d63";
+	var SALT = "f8eb4a8a6873ba15e86668f1a17c0642";
+	var PASSWORD = "1733";
+	var wizzpay = new WizzpayISP(WIZZ_URL, MID, IV_KEY, SALT, PASSWORD);
+	
+	wizzpay.setDebugMode(true);
+  
+  	var resultFunction = function () {
+		var returnData = wizzpay.getResultData();
+		  
+		console.log("return data", returnData);
+		alert("[" + returnData.GOODSNAME + "] ��ǰ�� ������ �Ϸ�Ǿ����ϴ�." );
+	};
+	
+  	wizzpay.setResultFunction(resultFunction);
+
+	function goPay() {
+	    wizzpay.goPay("merForm");
+	}
+</script>
+</html>

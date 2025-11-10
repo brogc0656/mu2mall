@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
       try {
         const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
+        // 상품권 발급 API 호출 (규격서 준수)
         const giftcardResponse = await fetch(`${baseUrl}/api/giftcard`, {
           method: 'POST',
           headers: {
@@ -66,10 +67,9 @@ export async function POST(request: NextRequest) {
           },
           body: JSON.stringify({
             orderId: ORDERID,
-            goodsCode: bypassData.goodsCode || '',
-            count: bypassData.count || 1,
-            price: parseInt(AMT),
             phone: bypassData.phone || '',
+            amount: parseInt(AMT),  // 'price' → 'amount'로 수정
+            message: bypassData.message || `${bypassData.buyerName || '고객'}님께서 구매하신 상품권입니다.`,
           }),
         });
 

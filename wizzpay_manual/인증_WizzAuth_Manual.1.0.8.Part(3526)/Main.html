@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<link href='./css/wizz.css' rel="stylesheet" type="text/css">
+<title>:::위즈페이 인증 결제:::</title>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h2><span class="blind">WIZZPAY</span></h2>
+  </div>
+  <div class="container">
+  		<div class="menu">
+  			<div class="top_line"></div>
+  			<div class="light"></div>
+  			<table class="menu_elm" cellpadding="0" cellspacing="0" border="0">
+  				<tbody><tr>
+  					<td colspan="2" class="ttl" style="padding-top:5px;">인증 결제 샘플 페이지</td>
+  				</tr>
+  			</tbody></table>
+  		</div>
+    <div class="contents">
+      <div class="title">
+        <div>상품명</div>
+        <div>상품금액</div>
+        <div>구매성공 URL</div>
+        <div>구매 결과 통지 URL</div>
+        <div>구매 결과 통지 파라미터</div>
+        <div>구매자명</div>
+      </div>
+      <div class="body">
+        <form class="merForm" name="merForm">
+          <input id="GOODSNAME" placeholder="상품명" name="GOODSNAME" size="20" class="input" value="테스트 결제입니다!!!">
+          <input id="AMT" placeholder="상품금액" size="20" class="input" value="1010">
+          <input id="RESULTURL" placeholder="resultURL" size="50" class="input" value="./Success.html">
+          <input id="NOTIURL" placeholder="notiURL" size="50" class="input" value="">
+          <input id="BYPASSVALUE" placeholder="bypassvalue" size="50" class="input" value="field1=abc;field2=def;">
+          <input id="BUYERNAME" placeholder="구매자명" class="input" size="20" value="테스트">
+        </form>
+      </div>
+    </div>
+    <font color="#ff0000">* 스크립트 호출을 원할 경우 URL란을 비워주세요.</font><br/><br/>
+    <button class="btnPay or w12" onclick="goPay();">결제</button>
+		<div class="info">고객지원 : 1544-3267 | 결제내역조회 www.wizzpay.co.kr<br>(주)유니윌 위즈페이</div>
+  </div>
+</div>
+</body>
+<script src="js/function.js" charset="utf-8"></script>
+<script>
+	var WIZZ_URL = "https://pgadmin.wizzpay.co.kr";
+	var MID = "";
+	var IV_KEY = "";
+	var SALT = "";
+	var PASSWORD = "";
+	var wizzpay = new WizzpayISP(WIZZ_URL, MID, IV_KEY, SALT, PASSWORD);
+	
+	wizzpay.setDebugMode(true);
+  
+  	var resultFunction = function () {
+		var returnData = wizzpay.getResultData();
+		  
+		console.log("return data", returnData);
+		alert("[" + returnData.GOODSNAME + "] 상품의 결제가 완료되었습니다." );
+	};
+	
+  	wizzpay.setResultFunction(resultFunction);
+
+	function goPay() {
+	    wizzpay.goPay("merForm");
+	}
+</script>
+</html>

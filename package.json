@@ -6,7 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "proxy:start": "node proxy-server.js",
+    "proxy:setup": "./setup-proxy-server.sh",
+    "monitor:start": "node monitor-dashboard.js",
+    "monitor:pm2": "pm2 start monitor-dashboard.js --name monitor-dashboard"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",

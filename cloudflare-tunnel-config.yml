@@ -1,0 +1,11 @@
+tunnel: chlifes-proxy
+credentials-file: /Users/hasanghyeon/brother_site/muyi-giftcard/.cloudflared/credentials.json
+
+ingress:
+  # 프록시 서버로 트래픽 전달
+  - hostname: chlifes-proxy.yourdomain.com  # 실제 도메인으로 변경 필요
+    service: http://localhost:3001
+  
+  # 기본 캐치올 (모든 요청)
+  - service: http_status:404
+

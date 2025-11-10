@@ -1,0 +1,85 @@
+﻿﻿@CHARSET "UTF-8";
+/* CSS Document */
+
+
+/******************************** common ****************************************************/
+*{margin:0;padding:0;}
+body{margin:0;padding:0;font-weight:normal;word-break:break-all;-ms-word-break:break-all;}
+body, div, table, select, button,																																																																																			 input, textarea{font-family:'돋움',Dotum,'굴림',Gulim,Helvetica Neue Condensed,Helvetica,Sans-Serif;color:#666;}
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {display:block}
+
+a, button, input[type=button] {cursor:pointer !important;}
+a:link		{color:#666;text-decoration:none;}
+a:visited	{color:#666;text-decoration:none;}
+a:hover		{color:#666;text-decoration:none;}
+a:active	{color:#666;text-decoration:none;}
+
+ul, ol, ul li, ol li, dl, dt, dd, dt dd{margin:0;padding:0;list-style:none;}
+h1, h2, h3, h4, h5{margin:0;padding:0;}
+img, fieldset{border:none;}
+textarea, table, th, td, input, select, button {vertical-align:middle}
+
+.blind {position:absolute;top:0;left:0;width:1px;height:1px;overflow:hidden;visibility:hidden;font-size:0px;line-height:0px}
+
+.w12{max-width:120px;}
+.w16{max-width:160px;}
+.w18{max-width:180px;}
+.w24{max-width:240px;}
+.w28{max-width:280px;}
+.w10p{width:100%;}
+
+button{width:30%;height:40px;margin:0 5px;font-size:14px;font-weight:bold;border-radius:5px;}
+button.gr{color:#666;background:#f5f5f5;border:1px solid #aaa;}
+button.or{color:#fff;background:#009aff;border:1px solid #0061bb;}
+
+
+/******************************** css ****************************************************/
+.wrap{width:600px;max-width:1024px;padding:0;margin:0 auto;text-align:center;}
+
+.header{width:600px;height:45px;position:relative;background:#fff;}
+.header h2{
+	width:160px;
+	height:45px;
+	margin:13px auto 0;
+	float:center;
+	background:url(../images/logo-02-t.png) no-repeat;
+	text-align: left;
+}
+
+.container{width:100%;}
+.container .menu{width:96%;margin:0 auto;position:relative;}
+.container .menu .top_line{width:100%;height:2px;background:url(../images/menu_topline_bg.png) repeat-x;}
+.container .menu .light{width:200px;height:80px;position:absolute;left:3px;top:3px;background:url(../images/light.png) no-repeat;}
+.container .menu .menu_elm{width:100%;padding:10px;background:url(../images/menu_bg.png) repeat-x;border-radius:0 0 30px 30px;}
+.container .menu .menu_elm th{width:50%;height:40px;padding:0 10px;color:#ffffb8;font-size:15px;font-weight:bold;text-align:left;}
+.container .menu .menu_elm td{width:50%;height:40px;padding:0 10px;color:#fff;font-size:18px;font-weight:bold;text-align:right;}
+.container .menu .menu_elm td .value{font-size:25px;}
+.container .menu .menu_elm td.ttl{height:40px;color:#fff;font-size:20px;text-align:center;vertical-align:top;}
+.container .menu .menu_elm th.st02, .container .menu .menu_elm td.st02{height:22px;font-size:12px;font-weight:normal;}
+.container .menu .menu_elm .bd_r{border-right:1px solid #0064b8;}
+.container .menu .menu_elm .bd_l{border-left:1px solid #52dcff;}
+.container .contents {width:96%;margin:0 auto;margin-top:20px;padding: 10px;background-color: #f8f8f8;}
+.container .contents .user_elm{width:100%;}
+.container .contents .user_elm th{width:50%;height:35px;padding:0 10px;color:#666;font-size:12px;line-height:20px;font-weight:normal;text-align:left;background:#f8f8f8;word-wrap:normal;}
+.container .contents .user_elm td{width:50%;height:35px;padding:0 10px;background:#f8f8f8;}
+.container .contents .user_elm td.subs{height:10px;background:#fff;}
+.container .contents .user_elm td.view{width:86px;height:24px;text-align:center;}
+.container .contents .user_elm td.view a{width:84px;height:22px;display:block;color:#525252;font-size:12px;line-height:22px;background:url(../images/wisecare/view_btn_bg.png) repeat-x;border:1px solid #2faaf1;border-radius:2px;}
+.container .contents .user_elm td.check_wrap{color:#666;font-size:12px;line-height:20px;text-align:right;}
+.container .contents .user_elm td.check_wrap .pay_check{display:inline-block;padding-left:24px;text-align:left;background:url(../images/wisecare/check-off.png) no-repeat;}
+.container .contents .user_elm td.check_wrap label.c_on {background:url(../images/wisecare/check-on.png) no-repeat;}
+.container .contents .user_elm td.check_wrap .pay_check input{position:absolute;left:-9999px;}
+.container .contents .user_elm td.df{text-align:left;}
+.container .contents .user_elm td select{width:150px;height:24px;}
+.container .contents .user_elm td input{min-width:150px;height:20px;padding:5px;color:#000;font-size:14px;line-height:20px;background:#fff;border:1px solid #ddd;}
+.container .contents .btn_wrap{width:100%;height:40px;margin:30px 0;text-align:center;}
+.container .contents .info{width:100%;color:#888;font-size:11px;line-height:16px;}
+
+.container .contents .dftxt_wrap{padding:15px 0;color:#333;font-size:12px;line-height:18px;text-align:left;}
+.container .contents .dftxt_wrap .sc_text{height:150px;padding:10px;overflow-y:scroll;border:1px solid #ccc;}
+.container .contents .dftxt_wrap .text{padding:0 10px;font-size:14px;text-align:center;}
+.container .contents .dftxt_wrap .text p{margin-top:10px;text-align:center;}
+
+.title {float:left;}
+.title > div {text-align:left; font-size:13px; padding:9px;}
+.merForm > input {max-width: 400px; display: block; font-size: 14px; margin: 3px; padding: 5px;}

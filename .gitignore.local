@@ -1,0 +1,7 @@
+# 프록시 서버 로그
+*.log
+/tmp/proxy-server.log
+
+# Cloudflare Tunnel 설정
+.cloudflared/
+cloudflare-tunnel-config.yml

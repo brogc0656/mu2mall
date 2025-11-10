@@ -1,0 +1,5 @@
+보안문제로 확장자를 txt로 보내드렸으니 js로 변경 부탁드립니다.
+
+js/aes.txt -> aes.js
+js/function.txt -> function.js
+js/pbkdf2.txt -> pbkdf2.js

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.brother.chlifes-proxy</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/hasanghyeon/.nvm/versions/node/v20.19.5/bin/node</string>
+        <string>/Users/hasanghyeon/brother_site/muyi-giftcard/proxy-server.js</string>
+    </array>
+    
+    <key>WorkingDirectory</key>
+    <string>/Users/hasanghyeon/brother_site/muyi-giftcard</string>
+    
+    <key>RunAtLoad</key>
+    <true/>
+    
+    <key>KeepAlive</key>
+    <true/>
+    
+    <key>StandardOutPath</key>
+    <string>/Users/hasanghyeon/brother_site/muyi-giftcard/logs/proxy-server.log</string>
+    
+    <key>StandardErrorPath</key>
+    <string>/Users/hasanghyeon/brother_site/muyi-giftcard/logs/proxy-server-error.log</string>
+    
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PORT</key>
+        <string>3001</string>
+        <key>PUBLIC_IP</key>
+        <string>180.80.147.23</string>
+    </dict>
+</dict>
+</plist>
+
