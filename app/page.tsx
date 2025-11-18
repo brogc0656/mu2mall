@@ -1,243 +1,104 @@
 'use client';
-import { useState, useEffect } from 'react';
-import Script from 'next/script';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-// 전역 타입 선언
-declare global {
-  interface Window {
-    WizzpayISP: any;
-    wizzpayInstance: any;
-    selectedAmount: number;
-    currentBrand: string;
-    currentTransaction: any;
-  }
-}
+type SelectedProduct = {
+  name: string;
+  amount: number; // 액면가
+  price: number;  // 실제 판매가
+  quantity: number;
+  brand: string;
+  goodsCode: string;
+};
+
+const GOODS_CODE_MAP: Record<string, string> = {
+  신세계: 'SSG',
+  GS25: 'GS25',
+  CU: 'CU',
+  STARBUCKS: 'STARBUCKS',
+};
+
+// 신세계상품권 가격표 (4% 수수료)
+const PRICE_MAP: Record<number, number> = {
+  10000: 10400,   // 10,000원권 → 10,400원
+  30000: 31200,   // 30,000원권 → 31,200원
+  50000: 52000,   // 50,000원권 → 52,000원
+  100000: 104000, // 100,000원권 → 104,000원
+};
 
 export default function HomePage() {
+  const router = useRouter();
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [resultModalOpen, setResultModalOpen] = useState(false);
-  const [processingOverlayOpen, setProcessingOverlayOpen] = useState(false);
-  const [processingMessage, setProcessingMessage] = useState('');
+  const [selectedAmount, setSelectedAmount] = useState(10000);
+  const [selectedBrand, setSelectedBrand] = useState('신세계');
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [selectedProduct, setSelectedProduct] = useState<SelectedProduct | null>(null);
 
-  const [selectedProduct, setSelectedProduct] = useState<{ name: string; amount: number } | null>(null);
-  const [phoneNumber, setPhoneNumber] = useState('010-1234-5678');
-  const [buyerName, setBuyerName] = useState('홍길동');
-
-  const [resultData, setResultData] = useState<{
-    icon: 'success' | 'error' | 'warning';
-    title: string;
-    message: string;
-    details?: string;
-  } | null>(null);
-
-  // WizzAuth 스크립트 로드 완료 후 초기화
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.selectedAmount = 10000;
-      window.currentBrand = '';
-      window.currentTransaction = null;
-    }
-
-    // Wizzpay SDK 초기화
-    const initWizzpay = async () => {
-      try {
-        const response = await fetch('/api/payment/config');
-        const data = await response.json();
-
-        if (data.success && data.config && typeof window !== 'undefined' && window.WizzpayISP) {
-          const { wizzUrl, mid, iv, salt, password } = data.config;
-          window.wizzpayInstance = new window.WizzpayISP(wizzUrl, mid, iv, salt, password);
-          window.wizzpayInstance.setDebugMode(true);
-          console.log('✅ WizzpayISP 초기화 완료');
-        }
-      } catch (error) {
-        console.error('❌ Wizzpay 초기화 실패:', error);
-      }
-    };
-
-    // SDK 로드 대기 후 초기화
-    const checkSDK = setInterval(() => {
-      if (typeof window !== 'undefined' && window.WizzpayISP) {
-        clearInterval(checkSDK);
-        initWizzpay();
-      }
-    }, 100);
-
-    // 10초 후 타임아웃
-    setTimeout(() => clearInterval(checkSDK), 10000);
-  }, []);
-
-  // 금액 선택
-  const selectAmount = (amount: number, brand: string) => {
-    if (typeof window !== 'undefined') {
-      window.selectedAmount = amount;
-      window.currentBrand = brand;
-    }
-
-    // UI 업데이트를 위한 상태는 별도로 관리하지 않고 직접 DOM 조작
-    const buttons = document.querySelectorAll('.amount-btn');
-    buttons.forEach((btn) => {
-      btn.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
-      btn.classList.add('border-gray-200');
-    });
-
-    const clickedButton = event?.target as HTMLElement;
-    if (clickedButton) {
-      clickedButton.classList.remove('border-gray-200');
-      clickedButton.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
-    }
+  const amountButtonClass = (amount: number, brand: string) => {
+    const baseClass = 'amount-btn px-4 py-3 bg-white border-2 rounded-lg text-sm font-medium transition-all';
+    const isActive = selectedBrand === brand && selectedAmount === amount;
+    const stateClass = isActive
+      ? ' border-blue-600 text-blue-600 bg-blue-50'
+      : ' border-gray-200 hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50';
+    return `${baseClass}${stateClass}`;
   };
 
-  // 상품권 구매하기 클릭
+  const selectAmount = (amount: number, brand: string) => {
+    setSelectedAmount(amount);
+    setSelectedBrand(brand);
+  };
+
   const buyGiftCard = (brand: string) => {
-    if (typeof window === 'undefined' || !window.selectedAmount) {
-      alert('금액을 선택해주세요.');
+    const goodsCode = GOODS_CODE_MAP[brand];
+    if (!goodsCode) {
+      alert('현재 지원하지 않는 상품입니다.');
       return;
     }
 
+    const price = PRICE_MAP[selectedAmount] || selectedAmount;
+
+    setSelectedBrand(brand);
     setSelectedProduct({
       name: `${brand}상품권`,
-      amount: window.selectedAmount,
+      amount: selectedAmount,
+      price: price,
+      quantity: selectedQuantity,
+      brand,
+      goodsCode,
     });
     setPaymentModalOpen(true);
   };
 
-  // Modal 닫기
+  const increaseQuantity = () => {
+    if (selectedQuantity < 10) {
+      setSelectedQuantity(selectedQuantity + 1);
+    }
+  };
+
+  const decreaseQuantity = () => {
+    if (selectedQuantity > 1) {
+      setSelectedQuantity(selectedQuantity - 1);
+    }
+  };
+
   const closeModal = () => {
     setPaymentModalOpen(false);
   };
 
-  // 결제 진행 (공식 WizzpayISP SDK 사용)
-  const proceedToPayment = async () => {
-    if (!phoneNumber || !buyerName) {
-      alert('휴대폰 번호와 구매자명을 입력해주세요.');
-      return;
-    }
-
+  const proceedToPayment = () => {
     if (!selectedProduct) {
       alert('상품을 선택해주세요.');
       return;
     }
 
-    // SDK 초기화 확인
-    if (typeof window === 'undefined' || !window.wizzpayInstance) {
-      alert('결제 시스템 초기화 중입니다. 잠시 후 다시 시도해주세요.');
-      return;
-    }
-
     closeModal();
-    setProcessingMessage('결제 진행 중...');
-    setProcessingOverlayOpen(true);
 
-    const orderId = 'ORDER_' + Date.now();
-    const productName = selectedProduct.name;
-    const amount = selectedProduct.amount;
-    const GOODS_CODE = 'SSG'; // 상품권 코드
+    const totalPrice = selectedProduct.price * selectedProduct.quantity;
 
-    // 거래 정보 저장
-    if (typeof window !== 'undefined') {
-      window.currentTransaction = {
-        orderId: orderId,
-        productName: productName,
-        amount: amount,
-        phoneNumber: phoneNumber,
-        buyerName: buyerName,
-        goodsCode: GOODS_CODE,
-      };
-    }
-
-    try {
-      const bypassValue = JSON.stringify({
-        orderId: orderId,
-        phone: phoneNumber,
-        goodsCode: GOODS_CODE,
-        buyerName: buyerName,
-      });
-
-      // WizzpayISP SDK용 Form 생성
-      const wizzForm = document.createElement('form');
-      wizzForm.name = 'wizzpayForm';
-      wizzForm.style.display = 'none';
-
-      // 필수 필드 추가
-      const goodsnameInput = document.createElement('input');
-      goodsnameInput.name = 'GOODSNAME';
-      goodsnameInput.value = productName.substring(0, 20);
-      wizzForm.appendChild(goodsnameInput);
-
-      const amtInput = document.createElement('input');
-      amtInput.name = 'AMT';
-      amtInput.value = amount.toString();
-      wizzForm.appendChild(amtInput);
-
-      const buyernameInput = document.createElement('input');
-      buyernameInput.name = 'BUYERNAME';
-      buyernameInput.value = buyerName;
-      wizzForm.appendChild(buyernameInput);
-
-      const resulturlInput = document.createElement('input');
-      resulturlInput.name = 'RESULTURL';
-      resulturlInput.value = './payment-success';
-      wizzForm.appendChild(resulturlInput);
-
-      const notiurlInput = document.createElement('input');
-      notiurlInput.name = 'NOTIURL';
-      notiurlInput.value = '';
-      wizzForm.appendChild(notiurlInput);
-
-      const bypassInput = document.createElement('input');
-      bypassInput.name = 'BYPASSVALUE';
-      bypassInput.value = '';
-      wizzForm.appendChild(bypassInput);
-
-      document.body.appendChild(wizzForm);
-
-      // 결제 결과 처리 함수 설정
-      window.wizzpayInstance.setResultFunction(() => {
-        const resultData = window.wizzpayInstance.getResultData();
-        setProcessingOverlayOpen(false);
-
-        if (resultData.RETURNCODE === '0000') {
-          setResultData({
-            icon: 'success',
-            title: '결제 성공',
-            message: '결제가 완료되었습니다.',
-            details: `거래번호: ${resultData.TID}`,
-          });
-          setResultModalOpen(true);
-        } else {
-          setResultData({
-            icon: 'error',
-            title: '결제 실패',
-            message: resultData.RETURNMSG || '결제에 실패했습니다.',
-          });
-          setResultModalOpen(true);
-        }
-
-        // Form 정리
-        if (document.body.contains(wizzForm)) {
-          document.body.removeChild(wizzForm);
-        }
-      });
-
-      // 공식 SDK로 결제 시작
-      window.wizzpayInstance.goPay('wizzpayForm');
-      console.log('✅ WizzpayISP SDK로 결제 시작');
-    } catch (error: any) {
-      console.error('❌ Payment launch failed:', error);
-      setProcessingOverlayOpen(false);
-      alert('결제 시스템 오류가 발생했습니다: ' + error.message);
-    }
-  };
-
-  // 결과 모달 닫기
-  const closeResultModal = () => {
-    setResultModalOpen(false);
-    setResultData(null);
-    if (typeof window !== 'undefined') {
-      window.currentTransaction = null;
-      window.selectedAmount = 10000;
-    }
+    // Redirect to dedicated payment page with Seedpayments
+    router.push(
+      `/payment?code=${selectedProduct.goodsCode}&amount=${selectedProduct.amount}&price=${selectedProduct.price}&quantity=${selectedProduct.quantity}&total=${totalPrice}`
+    );
   };
 
   // FAQ Accordion
@@ -265,11 +126,6 @@ export default function HomePage() {
 
   return (
     <>
-      {/* WizzAuth Scripts */}
-      <Script src="/wizzauth/aes.js" strategy="beforeInteractive" />
-      <Script src="/wizzauth/pbkdf2.js" strategy="beforeInteractive" />
-      <Script src="/wizzauth/function.js" strategy="beforeInteractive" />
-
       <div className="bg-gray-50 min-h-screen">
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -368,31 +224,69 @@ export default function HomePage() {
 
                   <div className="bg-gray-50 rounded-xl p-4 mb-5">
                     <p className="text-sm font-medium text-gray-700 mb-3">금액 선택</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 mb-4">
                       <button
                         onClick={() => selectAmount(10000, '신세계')}
-                        className="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all"
+                        className={amountButtonClass(10000, '신세계')}
                       >
-                        10,000원
+                        <div className="text-left">
+                          <div className="font-semibold">10,000원</div>
+                          <div className="text-xs text-gray-500">판매가: 10,400원</div>
+                        </div>
                       </button>
                       <button
                         onClick={() => selectAmount(30000, '신세계')}
-                        className="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all"
+                        className={amountButtonClass(30000, '신세계')}
                       >
-                        30,000원
+                        <div className="text-left">
+                          <div className="font-semibold">30,000원</div>
+                          <div className="text-xs text-gray-500">판매가: 31,200원</div>
+                        </div>
                       </button>
                       <button
                         onClick={() => selectAmount(50000, '신세계')}
-                        className="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all"
+                        className={amountButtonClass(50000, '신세계')}
                       >
-                        50,000원
+                        <div className="text-left">
+                          <div className="font-semibold">50,000원</div>
+                          <div className="text-xs text-gray-500">판매가: 52,000원</div>
+                        </div>
                       </button>
                       <button
                         onClick={() => selectAmount(100000, '신세계')}
-                        className="amount-btn px-4 py-3 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:text-blue-600 hover:bg-blue-50 text-sm font-medium transition-all"
+                        className={amountButtonClass(100000, '신세계')}
                       >
-                        100,000원
+                        <div className="text-left">
+                          <div className="font-semibold">100,000원</div>
+                          <div className="text-xs text-gray-500">판매가: 104,000원</div>
+                        </div>
                       </button>
+                    </div>
+
+                    <p className="text-sm font-medium text-gray-700 mb-2">수량 선택</p>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={decreaseQuantity}
+                        className="w-10 h-10 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center font-bold text-lg"
+                      >
+                        −
+                      </button>
+                      <div className="flex-1 text-center">
+                        <span className="text-2xl font-bold text-gray-900">{selectedQuantity}</span>
+                        <span className="text-sm text-gray-600 ml-1">개</span>
+                      </div>
+                      <button
+                        onClick={increaseQuantity}
+                        className="w-10 h-10 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center font-bold text-lg"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <div className="mt-3 text-center">
+                      <span className="text-sm text-gray-600">총 금액: </span>
+                      <span className="text-lg font-bold text-blue-600">
+                        {(PRICE_MAP[selectedAmount] * selectedQuantity).toLocaleString()}원
+                      </span>
                     </div>
                   </div>
 
@@ -537,7 +431,7 @@ export default function HomePage() {
                 },
                 {
                   q: '결제 수단은 무엇이 있나요?',
-                  a: '신용카드, 체크카드 등 카드 결제가 가능합니다. Wizzpay 안전 결제 시스템을 통해 안전하게 결제하실 수 있습니다.',
+                  a: '신용카드, 체크카드 등 카드 결제가 가능합니다. Seedpayments 안전 결제 시스템을 통해 안전하게 결제하실 수 있습니다.',
                 },
                 {
                   q: '환불은 가능한가요?',
@@ -672,28 +566,22 @@ export default function HomePage() {
                   <span className="font-bold text-gray-900">{selectedProduct?.name}</span>
                 </div>
                 <div className="flex justify-between items-center pb-3 border-b">
-                  <span className="text-gray-600">금액</span>
+                  <span className="text-gray-600">액면가</span>
                   <span className="font-bold text-gray-900">{selectedProduct?.amount.toLocaleString()}원</span>
                 </div>
-                <div className="pb-3 border-b">
-                  <label className="block text-gray-600 mb-2">받는 분 휴대폰 번호</label>
-                  <input
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="010-1234-5678"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
-                  />
+                <div className="flex justify-between items-center pb-3 border-b">
+                  <span className="text-gray-600">판매가</span>
+                  <span className="font-bold text-gray-900">{selectedProduct?.price.toLocaleString()}원</span>
                 </div>
-                <div>
-                  <label className="block text-gray-600 mb-2">구매자명</label>
-                  <input
-                    type="text"
-                    value={buyerName}
-                    onChange={(e) => setBuyerName(e.target.value)}
-                    placeholder="홍길동"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-600 focus:outline-none"
-                  />
+                <div className="flex justify-between items-center pb-3 border-b">
+                  <span className="text-gray-600">수량</span>
+                  <span className="font-bold text-gray-900">{selectedProduct?.quantity}개</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b">
+                  <span className="text-gray-600">총 결제금액</span>
+                  <span className="font-bold text-blue-600 text-xl">
+                    {selectedProduct && (selectedProduct.price * selectedProduct.quantity).toLocaleString()}원
+                  </span>
                 </div>
               </div>
 
@@ -711,88 +599,6 @@ export default function HomePage() {
                   결제하기
                 </button>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Processing Overlay */}
-        {processingOverlayOpen && (
-          <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-70">
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-4 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-              <p className="text-white text-lg font-bold">{processingMessage}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Result Modal */}
-        {resultModalOpen && resultData && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-8 rounded-2xl max-w-md w-[90%]">
-              <div className="text-center mb-6">
-                <div
-                  className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center ${
-                    resultData.icon === 'success'
-                      ? 'bg-green-100'
-                      : resultData.icon === 'error'
-                      ? 'bg-red-100'
-                      : 'bg-yellow-100'
-                  }`}
-                >
-                  {resultData.icon === 'success' && (
-                    <svg className="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                  {resultData.icon === 'error' && (
-                    <svg className="w-12 h-12 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                  {resultData.icon === 'warning' && (
-                    <svg className="w-12 h-12 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">{resultData.title}</h3>
-                <p className="text-gray-600">{resultData.message}</p>
-              </div>
-
-              {resultData.details && (
-                <div className="mb-6">
-                  <div
-                    className={`rounded-lg p-4 text-sm ${
-                      resultData.icon === 'success'
-                        ? 'bg-green-50 text-green-800'
-                        : resultData.icon === 'error'
-                        ? 'bg-red-50 text-red-800'
-                        : 'bg-yellow-50 text-yellow-800'
-                    }`}
-                  >
-                    {resultData.details}
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={closeResultModal}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-lg font-bold transition-all"
-              >
-                확인
-              </button>
             </div>
           </div>
         )}
